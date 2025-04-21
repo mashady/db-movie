@@ -1,32 +1,31 @@
-const jsonServer = require('json-server');
-const path = require('path');
+// See https://github.com/typicode/json-server#module
+const jsonServer = require('json-server')
 
-const server = jsonServer.create();
-const router = jsonServer.router(path.join(__dirname, 'db.json'));
-const middlewares = jsonServer.defaults();
+const server = jsonServer.create()
 
-server.use((req, res, next) => {
-  console.log(`[${req.method}] ${req.url}`);
-  next();
-});
+// Uncomment to allow write operations
+// const fs = require('fs')
+// const path = require('path')
+// const filePath = path.join('db.json')
+// const data = fs.readFileSync(filePath, "utf-8");
+// const db = JSON.parse(data);
+// const router = jsonServer.router(db)
 
-server.use((req, res, next) => {
-  const invalidIdMatch = req.url.match(/\/\w+\/(null|undefined)(\/)?$/);
-  if (invalidIdMatch) {
-    return res.status(400).json({ error: 'Invalid ID in URL' });
-  }
-  next();
-});
+// Comment out to allow write operations
+const router = jsonServer.router('db.json')
 
-server.use(middlewares);
+const middlewares = jsonServer.defaults()
 
+server.use(middlewares)
+// Add this before server.use(router)
 server.use(jsonServer.rewriter({
-  '/api/*': '/$1',
-  '/blog/:resource/:id/show': '/:resource/:id'
-}));
-
-server.use(router);
-
+    '/api/*': '/$1',
+    '/blog/:resource/:id/show': '/:resource/:id'
+}))
+server.use(router)
 server.listen(3000, () => {
-  console.log('JSON Server is running on port 3000');
-});
+    console.log('JSON Server is running')
+})
+
+// Export the Server API
+module.exports = server
